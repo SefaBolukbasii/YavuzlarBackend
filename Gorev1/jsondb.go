@@ -60,7 +60,6 @@ func (db *Database) TabloOlustur(tAdi string, columns []Column) error {
 
 func (t *Table) save(dbPath string) error {
 	t.mutex.Lock()
-	defer t.mutex.Unlock()
 
 	filePath := filepath.Join(dbPath, t.Name+".json")
 	file, err := os.Create(filePath)
@@ -68,6 +67,7 @@ func (t *Table) save(dbPath string) error {
 		return err
 	}
 	defer file.Close()
+	t.mutex.Unlock()
 	return json.NewEncoder(file).Encode(t)
 }
 func (db *Database) Insert(tabloAdi string, degerler map[string]any) error {
