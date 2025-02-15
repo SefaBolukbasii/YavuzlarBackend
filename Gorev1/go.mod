@@ -1,4 +1,4 @@
-module github.com/SefaBolukbasii/JSONdb
+module github.com/SefaBolukbasii/Gorev1
 
 go 1.23.3
 
