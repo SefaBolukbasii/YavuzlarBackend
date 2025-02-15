@@ -75,8 +75,7 @@ func (db *Database) Insert(tabloAdi string, degerler map[string]any) error {
 	if !varMi {
 		return errors.New("boyle bir tablo yok")
 	}
-	t.mutex.Lock()         // nesneyi kilitler çakışma olmasın die
-	defer t.mutex.Unlock() //fonksiyon bitince otomatik açar
+	t.mutex.Lock() // nesneyi kilitler çakışma olmasın die
 	for _, col := range t.Columns {
 		if col.PrimaryKey { //primary key kontrol kısmı
 			if col.Type == KendiINT && col.AutoIncrement {
@@ -87,6 +86,7 @@ func (db *Database) Insert(tabloAdi string, degerler map[string]any) error {
 		}
 	}
 	t.Data = append(t.Data, degerler)
+	t.mutex.Unlock()
 	return t.save(db.Path)
 }
 
@@ -104,12 +104,13 @@ func (db *Database) Delete(tAdi string, key string, value any) error {
 		return errors.New("Tablo Yok")
 	}
 	t.mutex.Lock()
-	defer t.mutex.Unlock()
+
 	for i, row := range t.Data {
 		if row[key] == value {
 			t.Data = append(t.Data[:i], t.Data[i+1:]...)
 		}
 	}
+	t.mutex.Unlock()
 	return t.save(db.Path)
 }
 func (db *Database) Update(tAdi string, key string, eskiValue any, yeniValue any) error {
@@ -118,11 +119,12 @@ func (db *Database) Update(tAdi string, key string, eskiValue any, yeniValue any
 		return errors.New("Tablo Yok")
 	}
 	t.mutex.Lock()
-	defer t.mutex.Unlock()
+
 	for i, row := range t.Data {
 		if row[key] == eskiValue {
 			t.Data[i][key] = yeniValue
 		}
 	}
+	t.mutex.Unlock()
 	return t.save(db.Path)
 }
