@@ -74,15 +74,18 @@ func (t *Table) save(dbPath string) error {
 func (db *Database) Insert(tabloAdi string, degerler map[string]any) error {
 	t, varMi := db.Tables[tabloAdi]
 	if !varMi {
-		return errors.New("boyle bir tablo yok")
+		return errors.New("boyle bir tabbblo yok")
 	}
 	t.mutex.Lock() // nesneyi kilitler çakışma olmasın die
+
 	for _, col := range t.Columns {
 		if col.PrimaryKey { //primary key kontrol kısmı
 			if col.Type == KendiINT && col.AutoIncrement {
 				degerler[col.Name] = len(t.Data) + 1
+				break
 			} else if col.Type == KendiSTRING {
 				degerler[col.Name] = uuid.NewString()
+				break
 			}
 		}
 	}
