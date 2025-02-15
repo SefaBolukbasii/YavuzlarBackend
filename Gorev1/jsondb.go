@@ -64,6 +64,7 @@ func (t *Table) save(dbPath string) error {
 	filePath := filepath.Join(dbPath, t.Name+".json")
 	file, err := os.Create(filePath)
 	if err != nil {
+		t.mutex.Unlock()
 		return err
 	}
 	defer file.Close()
