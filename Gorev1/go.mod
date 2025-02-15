@@ -1,4 +1,4 @@
-module github.com/SefaBolukbasii/Gorev1
+module github.com/SefaBolukbasii/YavuzlarBackend/Gorev1
 
 go 1.23.3
 
