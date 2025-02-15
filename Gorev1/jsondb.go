@@ -59,12 +59,14 @@ func (db *Database) TabloOlustur(tAdi string, columns []Column) error {
 }
 
 func (t *Table) save(dbPath string) error {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 	filePath := filepath.Join(dbPath, t.Name+".json")
 	file, err := os.Create(filePath)
 	if err != nil {
+
 		return err
 	}
-
 	err = json.NewEncoder(file).Encode(t)
 	file.Close()
 	return err
@@ -74,7 +76,7 @@ func (db *Database) Insert(tabloAdi string, degerler map[string]any) error {
 	if !varMi {
 		return errors.New("boyle bir tablo yok")
 	}
-
+	t.mutex.Lock() // nesneyi kilitler çakışma olmasın die
 	for _, col := range t.Columns {
 		if col.PrimaryKey { //primary key kontrol kısmı
 			if col.Type == KendiINT && col.AutoIncrement {
@@ -85,7 +87,7 @@ func (db *Database) Insert(tabloAdi string, degerler map[string]any) error {
 		}
 	}
 	t.Data = append(t.Data, degerler)
-
+	t.mutex.Unlock()
 	return t.save(db.Path)
 }
 
