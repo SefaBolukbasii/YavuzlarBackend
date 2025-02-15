@@ -67,8 +67,8 @@ func (t *Table) save(dbPath string) error {
 		t.mutex.Unlock()
 		return err
 	}
-	defer file.Close()
 	t.mutex.Unlock()
+	defer file.Close()
 	return json.NewEncoder(file).Encode(t)
 }
 func (db *Database) Insert(tabloAdi string, degerler map[string]any) error {
