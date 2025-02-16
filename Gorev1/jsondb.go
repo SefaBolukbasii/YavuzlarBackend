@@ -1,9 +1,8 @@
-package main
+package jsondb
 
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -170,12 +169,4 @@ func (db *Database) Update(tAdi string, key string, eskiValue any, yeniValue any
 	}
 	t.mutex.Unlock()
 	return t.save(db.Path)
-}
-func main() {
-	db, err := DatabaseOlustur("db1")
-	if err != nil {
-		fmt.Println("olmadı")
-	}
-	db.Update("user", "name", "Mehmet", "Mahmut")
-
 }
