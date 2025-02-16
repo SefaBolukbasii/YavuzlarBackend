@@ -1,8 +1,9 @@
-package jsondb
+package main
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -41,11 +42,18 @@ type Database struct {
 
 func DatabaseOlustur(name string) (*Database, error) {
 	path := filepath.Join("./", name)
-	err := os.MkdirAll(path, os.ModePerm)
-	if err != nil {
-		return nil, err
+	info, err := os.Stat(path)
+	if info.IsDir() {
+		db := &Database{Name: name, Path: path, Tables: make(map[string]*Table)}
+		db.DbGetir()
+		return db, nil
+	} else {
+		err = os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			return nil, err
+		}
+		return &Database{Name: name, Path: path, Tables: make(map[string]*Table)}, nil
 	}
-	return &Database{Name: name, Path: path, Tables: make(map[string]*Table)}, nil
 
 }
 func (db *Database) TabloOlustur(tAdi string, columns []Column) error {
@@ -56,6 +64,37 @@ func (db *Database) TabloOlustur(tAdi string, columns []Column) error {
 	table := &Table{Name: tAdi, Columns: columns, Data: []map[string]any{}}
 	db.Tables[tAdi] = table
 	return table.save(db.Path)
+}
+func (db *Database) DbGetir() error {
+	dosya, err := os.ReadDir(db.Path)
+	if err != nil {
+		return err
+	}
+	for _, a := range dosya {
+		if filepath.Ext(a.Name()) == ".json" {
+			tAdi := a.Name()[:len(a.Name())-5]
+			tablo := &Table{Name: tAdi}
+			err = tablo.TabloGetir(db.Path)
+			if err != nil {
+				return err
+			}
+			db.Tables[tAdi] = tablo
+		}
+	}
+	return nil
+}
+func (t *Table) TabloGetir(dbPath string) error {
+	dosyaYolu := filepath.Join(dbPath, t.Name+".json")
+	dosya, err := os.Open(dosyaYolu)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	defer dosya.Close()
+	return json.NewDecoder(dosya).Decode(&t)
+
 }
 
 func (t *Table) save(dbPath string) error {
@@ -131,4 +170,12 @@ func (db *Database) Update(tAdi string, key string, eskiValue any, yeniValue any
 	}
 	t.mutex.Unlock()
 	return t.save(db.Path)
+}
+func main() {
+	db, err := DatabaseOlustur("db1")
+	if err != nil {
+		fmt.Println("olmadı")
+	}
+	db.Update("user", "name", "Mehmet", "Mahmut")
+
 }
