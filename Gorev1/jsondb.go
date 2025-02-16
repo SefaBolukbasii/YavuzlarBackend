@@ -42,16 +42,23 @@ type Database struct {
 func DatabaseOlustur(name string) (*Database, error) {
 	path := filepath.Join("./", name)
 	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err := os.MkdirAll(path, os.ModePerm)
+			if err != nil {
+				return nil, err
+			}
+			return &Database{Name: name, Path: path, Tables: make(map[string]*Table)}, nil
+		}
+		return nil, err
+	}
 	if info.IsDir() {
 		db := &Database{Name: name, Path: path, Tables: make(map[string]*Table)}
 		db.DbGetir()
 		return db, nil
 	} else {
-		err = os.MkdirAll(path, os.ModePerm)
-		if err != nil {
-			return nil, err
-		}
-		return &Database{Name: name, Path: path, Tables: make(map[string]*Table)}, nil
+
+		return nil, errors.New("aynı adda dosya var bu sebeple oluşturulamadı")
 	}
 
 }
