@@ -1,1 +1,0 @@
-{"name":"users","columns":[{"name":"id","type":"INT","primary_key":true,"auto_increment":true},{"name":"name","type":"STRING"},{"name":"password","type":"STRING"}],"data":[{"id":1,"name":"Alice","password":"123456"}]}

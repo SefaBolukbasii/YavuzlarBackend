@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
@@ -99,8 +100,41 @@ func (t *Table) TabloGetir(dbPath string) error {
 		return err
 	}
 	defer dosya.Close()
-	return json.NewDecoder(dosya).Decode(&t)
+	err = json.NewDecoder(dosya).Decode(&t)
+	if err != nil {
+		return err
+	}
+	for i, row := range t.Data {
+		for _, col := range t.Columns {
+			deger, varMi := row[col.Name]
+			if !varMi {
+				continue
+			}
+			switch col.Type {
+			case "INT":
+				switch v := deger.(type) {
+				case float64:
+					t.Data[i][col.Name] = int(v)
+				case string:
+					IntDeger, err := strconv.Atoi(v)
+					if err == nil {
+						t.Data[i][col.Name] = IntDeger
+					}
+				}
 
+			case "BOOL":
+				if strDeger, ok := deger.(string); ok {
+					if BoolDeger, err := strconv.ParseBool(strDeger); err == nil {
+						t.Data[i][col.Name] = BoolDeger
+					}
+
+				}
+
+			}
+
+		}
+	}
+	return nil
 }
 
 func (t *Table) save(dbPath string) error {

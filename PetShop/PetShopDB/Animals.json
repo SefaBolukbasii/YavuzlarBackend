@@ -1,0 +1,1 @@
+{"name":"Animals","columns":[{"name":"id","type":"INT","primary_key":true,"auto_increment":true},{"name":"Name","type":"STRING"},{"name":"Species","type":"STRING"},{"name":"OwnerId","type":"INT"}],"data":[{"Name":"Paşa","OwnerId":0,"Species":"Köpek","id":1},{"Name":"Maya","OwnerId":0,"Species":"Kedi","id":2},{"Name":"SarıKız","OwnerId":0,"Species":"İnek","id":3}]}

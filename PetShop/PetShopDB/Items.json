@@ -1,0 +1,1 @@
+{"name":"Items","columns":[{"name":"id","type":"INT","primary_key":true,"auto_increment":true},{"name":"ItemName","type":"STRING"},{"name":"Price","type":"INT"}],"data":[{"ItemName":"kraker","Price":10,"id":1}]}

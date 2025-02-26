@@ -1,1 +1,0 @@
-{"name":"deneme","columns":[{"name":"id","type":"INT","primary_key":true,"auto_increment":true},{"name":"name","type":"STRING"}],"data":[{"id":1,"name":"Bob"}]}

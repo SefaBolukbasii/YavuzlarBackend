@@ -1,0 +1,1 @@
+{"name":"ItemUser","columns":[{"name":"id","type":"INT","primary_key":true,"auto_increment":true},{"name":"ItemId","type":"INT"},{"name":"UserId","type":"INT"},{"name":"TotalPrice","type":"INT"}],"data":[{"ItemId":1,"TotalPrice":10,"UserId":0,"id":1}]}

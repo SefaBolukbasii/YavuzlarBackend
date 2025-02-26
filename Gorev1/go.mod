@@ -1,4 +1,4 @@
-module github.com/SefaBolukbasii/YavuzlarBackend/Gorev1
+module github.com/SefaBolukbasii/JsonDB
 
 go 1.23.3
 
