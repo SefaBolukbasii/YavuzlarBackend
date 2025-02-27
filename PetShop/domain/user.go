@@ -11,7 +11,7 @@ type User struct {
 type IUserService interface {
 	Register(username, password, role string) error
 	Login(username, password string) (*User, error)
-	ChangeBalance(user *User, oldBalance, newBalance int) (*User, error)
+	ChangeBalance(user *User, oldBalance, newBalance int) error
 	DeleteUser(UserId int) error
 	ListUser() ([]User, error)
 }

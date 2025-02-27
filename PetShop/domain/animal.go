@@ -13,5 +13,5 @@ type IAnimal interface {
 	UpdateAnimal(oldName, newName string) error
 	ListAnimals() ([]Animal, error)
 	AnimalOwned(AnimalId, UserId int) error
-	MyAnimals(UserId *int) ([]Animal, error)
+	MyAnimals(UserId int) ([]Animal, error)
 }

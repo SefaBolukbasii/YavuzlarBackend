@@ -9,7 +9,7 @@ type Item struct {
 type Iitem interface {
 	AddItem(item Item) error
 	DeleteItem(id int) error
-	UpdateItem(item Item) error
+	UpdateItem(item *Item, newPrice int) error
 	ListItems() ([]Item, error)
 	ToBuy(Item *Item, User *User) error
 	ListBuy(User *User) ([]Item, error)

@@ -1,18 +1,21 @@
 package service
 
 import (
-	"petshop/Database"
 	"petshop/domain"
+
+	jsondb "github.com/SefaBolukbasii/JsonDB"
 )
 
-type AnimalService struct{}
+type AnimalService struct {
+	db *jsondb.Database
+}
 
+func CreateAnimalService(db *jsondb.Database) domain.IAnimal {
+	return &AnimalService{db: db}
+}
 func (as *AnimalService) AddAnimal(animal domain.Animal) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Insert("Animals", map[string]any{
+
+	if err := as.db.Insert("Animals", map[string]any{
 		"Name":    animal.Name,
 		"Species": animal.Species,
 		"OwnerId": -1,
@@ -23,31 +26,22 @@ func (as *AnimalService) AddAnimal(animal domain.Animal) error {
 	return nil
 }
 func (as *AnimalService) DeleteAnimal(id int) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Delete("Animals", "id", id); err != nil {
+
+	if err := as.db.Delete("Animals", "id", id); err != nil {
 		return err
 	}
 	return nil
 }
 func (as *AnimalService) UpdateAnimal(oldName, newName string) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Update("Animals", "Name", oldName, newName); err != nil {
+
+	if err := as.db.Update("Animals", "Name", oldName, newName); err != nil {
 		return err
 	}
 	return nil
 }
 func (as *AnimalService) ListAnimals() ([]domain.Animal, error) {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return nil, err
-	}
-	Animals, err := Veritabani.Db.Select("Animals")
+
+	Animals, err := as.db.Select("Animals")
 	if err != nil {
 		return nil, err
 	}
@@ -66,11 +60,8 @@ func (as *AnimalService) ListAnimals() ([]domain.Animal, error) {
 }
 
 func (as *AnimalService) AnimalOwned(AnimalId, UserId int) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Update("Animals", "OwnerId", -1, UserId); err != nil {
+
+	if err := as.db.Update("Animals", "OwnerId", -1, UserId); err != nil {
 		return err
 	}
 	return nil

@@ -4,14 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"petshop/Database"
 	"petshop/domain"
 	"petshop/service"
+
+	jsondb "github.com/SefaBolukbasii/JsonDB"
 )
 
 var devamMı bool
 var userSession domain.User
 
-func AdminGenelİşlemler() {
+func AdminGenelİşlemler(Db *jsondb.Database) {
 	var TusMenu int
 	fmt.Println("1-Hayvan İşlemleri")
 	fmt.Println("2-Müşteri İşlemleri")
@@ -19,18 +22,18 @@ func AdminGenelİşlemler() {
 	fmt.Println("4-Çıkış")
 	fmt.Scan(&TusMenu)
 	if TusMenu == 1 {
-		AdminHayvanIslemleri()
+		AdminHayvanIslemleri(Db)
 	} else if TusMenu == 2 {
-		AdminMusteriIslemleri()
+		AdminMusteriIslemleri(Db)
 	} else if TusMenu == 3 {
-		AdminMarketIslemleri()
+		AdminMarketIslemleri(Db)
 	} else if TusMenu == 4 {
 		os.Exit(0)
 	} else {
 		fmt.Println("Hatalı tuşlama yaptınız")
 	}
 }
-func AdminMusteriIslemleri() {
+func AdminMusteriIslemleri(Db *jsondb.Database) {
 	var TusMenu int
 	var MusteriId int
 	fmt.Println("1-Müşteri Ekleme")
@@ -39,10 +42,10 @@ func AdminMusteriIslemleri() {
 	fmt.Println("4-Müşteri Listeleme")
 	fmt.Println("5-Çıkış")
 	fmt.Scan(&TusMenu)
-	us := service.UserService{}
-	ls := service.LogService{}
+	us := service.CreateUserService(Db)
+	ls := service.CreateLogService(Db)
 	if TusMenu == 1 {
-		UyeOlPage()
+		UyeOlPage(Db)
 		ls.LogAdd(userSession.ID, "Kullanıcı ekledi")
 	} else if TusMenu == 2 {
 		fmt.Print("Silmek istediğiniz müşterinin ID'sini giriniz ")
@@ -96,9 +99,9 @@ func AdminMusteriIslemleri() {
 	} else {
 		fmt.Println("Hatalı tuşlama yaptınız")
 	}
-	AdminGenelİşlemler()
+	AdminGenelİşlemler(Db)
 }
-func AdminHayvanIslemleri() {
+func AdminHayvanIslemleri(Db *jsondb.Database) {
 	var TusHayvan int
 	var AnimalSpecies string
 	var AnimalName string
@@ -110,8 +113,8 @@ func AdminHayvanIslemleri() {
 	fmt.Println("4-Hayvan Listeleme")
 	fmt.Println("5-Geri")
 	fmt.Println("6-Çıkış")
-	as := service.AnimalService{}
-	ls := service.LogService{}
+	as := service.CreateAnimalService(Db)
+	ls := service.CreateLogService(Db)
 	fmt.Scan(&TusHayvan)
 	if TusHayvan == 1 {
 		fmt.Println("Hayvanın Türü: ")
@@ -162,9 +165,9 @@ func AdminHayvanIslemleri() {
 	} else {
 		fmt.Println("Hatalı Tuşlama")
 	}
-	AdminGenelİşlemler()
+	AdminGenelİşlemler(Db)
 }
-func AdminMarketIslemleri() {
+func AdminMarketIslemleri(Db *jsondb.Database) {
 	var TusMenu int
 	var ItemName string
 	var ItemPrice int
@@ -176,8 +179,8 @@ func AdminMarketIslemleri() {
 	fmt.Println("4-İtem Listeleme")
 	fmt.Println("5-Çıkış")
 	fmt.Scan(&TusMenu)
-	Is := service.ItemService{}
-	ls := service.LogService{}
+	Is := service.CreateItemService(Db)
+	ls := service.CreateLogService(Db)
 	if TusMenu == 1 {
 		fmt.Print("İtem İsmi: ")
 		fmt.Scan(&ItemName)
@@ -188,7 +191,7 @@ func AdminMarketIslemleri() {
 			Price: ItemPrice,
 		}); err != nil {
 			fmt.Println(err)
-			AdminGenelİşlemler()
+			AdminGenelİşlemler(Db)
 		}
 		ls.LogAdd(userSession.ID, "İtem ekledi")
 	} else if TusMenu == 2 {
@@ -196,7 +199,7 @@ func AdminMarketIslemleri() {
 		fmt.Scan(&ItemId)
 		if err := Is.DeleteItem(ItemId); err != nil {
 			fmt.Println(err)
-			AdminGenelİşlemler()
+			AdminGenelİşlemler(Db)
 		}
 		ls.LogAdd(userSession.ID, "İtem sildi")
 	} else if TusMenu == 3 {
@@ -232,9 +235,9 @@ func AdminMarketIslemleri() {
 	} else {
 		fmt.Println("Hatalı tuşlama yaptınız")
 	}
-	AdminGenelİşlemler()
+	AdminGenelİşlemler(Db)
 }
-func UyeOlPage() {
+func UyeOlPage(Db *jsondb.Database) {
 	var kulAD string
 	var sifre string
 	fmt.Print("Kullanıcı Adı: ")
@@ -243,7 +246,7 @@ func UyeOlPage() {
 	fmt.Print("Şifre: ")
 	fmt.Scan(&sifre)
 	if len(kulAD) != 0 && kulAD != " " && len(sifre) != 0 && sifre != " " {
-		us := service.UserService{}
+		us := service.CreateUserService(Db)
 		if err := us.Register(kulAD, sifre, "musteri"); err != nil {
 			fmt.Println(err)
 			fmt.Println("Kayıt olunamadı")
@@ -254,7 +257,7 @@ func UyeOlPage() {
 		fmt.Println("Kullanıcı Adı veya Şifre eksik")
 	}
 }
-func GirisYap() (*domain.User, error) {
+func GirisYap(Db *jsondb.Database) (*domain.User, error) {
 	var kulAD string
 	var sifre string
 	fmt.Print("Kullanıcı Adı: ")
@@ -262,9 +265,10 @@ func GirisYap() (*domain.User, error) {
 	fmt.Println("")
 	fmt.Print("Şifre: ")
 	fmt.Scan(&sifre)
-	ls := service.LogService{}
+	ls := service.CreateLogService(Db)
 	if len(kulAD) != 0 && kulAD != " " && len(sifre) != 0 && sifre != " " {
-		us := service.UserService{}
+		us := service.CreateUserService(Db)
+
 		kullanici, err := us.Login(kulAD, sifre)
 		if err != nil {
 			fmt.Println("Hatalı giriş")
@@ -277,7 +281,7 @@ func GirisYap() (*domain.User, error) {
 		return nil, errors.New("Kullanici adi veya sifre eksik")
 	}
 }
-func MusteriGenelIslemleri() {
+func MusteriGenelIslemleri(Db *jsondb.Database) {
 	var TusMenu int
 	var NewBalance int
 	var oldBalance int
@@ -286,12 +290,12 @@ func MusteriGenelIslemleri() {
 	fmt.Println("3-Bakiye Yükle")
 	fmt.Println("4-Çıkış")
 	fmt.Scan(&TusMenu)
-	us := service.UserService{}
-	ls := service.LogService{}
+	us := service.CreateUserService(Db)
+	ls := service.CreateLogService(Db)
 	if TusMenu == 1 {
-		musteriHayvanIslemleri()
+		musteriHayvanIslemleri(Db)
 	} else if TusMenu == 2 {
-		musteriMarketIslemleri()
+		musteriMarketIslemleri(Db)
 	} else if TusMenu == 3 {
 		fmt.Print("Yüklemek İstediğiniz tutarı giriniz: ")
 		fmt.Scan(&NewBalance)
@@ -302,14 +306,14 @@ func MusteriGenelIslemleri() {
 			fmt.Println("Bakiye yüklendi")
 			ls.LogAdd(userSession.ID, "Bakiye ekledi")
 		}
-		MusteriGenelIslemleri()
+		MusteriGenelIslemleri(Db)
 	} else if TusMenu == 4 {
 		os.Exit(0)
 	} else {
 		fmt.Println("Hatalı tuşlama yaptınız")
 	}
 }
-func musteriHayvanIslemleri() {
+func musteriHayvanIslemleri(Db *jsondb.Database) {
 	var TusHayvan int
 	var AnimalOldName string
 	var AnimalNewName string
@@ -320,8 +324,8 @@ func musteriHayvanIslemleri() {
 	fmt.Println("4-Hayvan Listeleme")
 	fmt.Println("5-Geri")
 	fmt.Println("6-Çıkış")
-	as := service.AnimalService{}
-	ls := service.LogService{}
+	as := service.CreateAnimalService(Db)
+	ls := service.CreateLogService(Db)
 	fmt.Scan(&TusHayvan)
 	if TusHayvan == 1 {
 		fmt.Print("Sahiplenmek istediğiniz hayvan Id: ")
@@ -375,9 +379,9 @@ func musteriHayvanIslemleri() {
 	} else {
 		fmt.Println("Hatalı Tuşlama")
 	}
-	MusteriGenelIslemleri()
+	MusteriGenelIslemleri(Db)
 }
-func musteriMarketIslemleri() {
+func musteriMarketIslemleri(Db *jsondb.Database) {
 	var TusMarket int
 	var ItemId int
 	var ItemDomain domain.Item
@@ -386,8 +390,8 @@ func musteriMarketIslemleri() {
 	fmt.Println("3-Geri")
 	fmt.Println("4-Çıkış")
 	fmt.Scan(&TusMarket)
-	Is := service.ItemService{}
-	ls := service.LogService{}
+	Is := service.CreateItemService(Db)
+	ls := service.CreateLogService(Db)
 	if TusMarket == 1 {
 		Items, err := Is.ListItems()
 		if err != nil {
@@ -438,10 +442,14 @@ func musteriMarketIslemleri() {
 	} else {
 		fmt.Println("Hatalı seçim")
 	}
-	MusteriGenelIslemleri()
+	MusteriGenelIslemleri(Db)
 }
 func main() {
 
+	db, err := Database.Connect()
+	if err != nil {
+		fmt.Println(err)
+	}
 	var Tus int
 	devamMı = true
 	for devamMı == true {
@@ -450,19 +458,20 @@ func main() {
 		fmt.Println("2-Giriş Yap")
 		fmt.Scan(&Tus)
 		if Tus == 1 {
-			UyeOlPage()
+			UyeOlPage(db)
 		} else if Tus == 2 {
-			userSession, err := GirisYap()
+			userSession, err := GirisYap(db)
 			if err != nil {
 				fmt.Println("Hatalı şifre veya kullanıcı adı")
 			} else {
 				if userSession.Role == "admin" {
-					AdminGenelİşlemler()
-				} else if userSession.Role == "müsteri" {
-					MusteriGenelIslemleri()
+					AdminGenelİşlemler(db)
+				} else if userSession.Role == "musteri" {
+					MusteriGenelIslemleri(db)
 				}
 			}
 
 		}
 	}
+
 }

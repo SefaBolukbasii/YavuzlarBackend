@@ -1,18 +1,21 @@
 package service
 
 import (
-	"petshop/Database"
 	"petshop/domain"
+
+	jsondb "github.com/SefaBolukbasii/JsonDB"
 )
 
-type ItemService struct{}
+type ItemService struct {
+	db *jsondb.Database
+}
 
+func CreateItemService(db *jsondb.Database) domain.Iitem {
+	return &ItemService{db: db}
+}
 func (Is *ItemService) AddItem(item domain.Item) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Insert("Items", map[string]any{
+
+	if err := Is.db.Insert("Items", map[string]any{
 		"ItemName": item.Name,
 		"Price":    item.Price,
 	}); err != nil {
@@ -22,11 +25,8 @@ func (Is *ItemService) AddItem(item domain.Item) error {
 }
 
 func (Is *ItemService) DeleteItem(id int) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Delete("Items", "id", id); err != nil {
+
+	if err := Is.db.Delete("Items", "id", id); err != nil {
 		return err
 	}
 	return nil
@@ -34,11 +34,8 @@ func (Is *ItemService) DeleteItem(id int) error {
 
 func (Is *ItemService) UpdateItem(item *domain.Item, newPrice int) error {
 	oldPrice := item.Price
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Update("Items", "Price", oldPrice, newPrice); err != nil {
+
+	if err := Is.db.Update("Items", "Price", oldPrice, newPrice); err != nil {
 		return err
 	}
 	item.Price = newPrice
@@ -46,11 +43,8 @@ func (Is *ItemService) UpdateItem(item *domain.Item, newPrice int) error {
 }
 
 func (Is *ItemService) ListItems() ([]domain.Item, error) {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return nil, err
-	}
-	Items, err := Veritabani.Db.Select("Items")
+
+	Items, err := Is.db.Select("Items")
 	if err != nil {
 		return nil, err
 	}
@@ -67,11 +61,8 @@ func (Is *ItemService) ListItems() ([]domain.Item, error) {
 }
 
 func (Is *ItemService) ToBuy(Item *domain.Item, User *domain.User) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err = Veritabani.Db.Insert("ItemUser", map[string]any{
+
+	if err := Is.db.Insert("ItemUser", map[string]any{
 		"ItemId":     Item.ID,
 		"UserId":     User.ID,
 		"TotalPrice": Item.Price,
@@ -79,7 +70,7 @@ func (Is *ItemService) ToBuy(Item *domain.Item, User *domain.User) error {
 		return err
 	}
 	userService := UserService{}
-	err = userService.ChangeBalance(User, User.Balance, User.Balance-Item.Price)
+	err := userService.ChangeBalance(User, User.Balance, User.Balance-Item.Price)
 	if err != nil {
 		return err
 	}
@@ -90,11 +81,8 @@ func (Is *ItemService) ListBuy(User *domain.User) ([]domain.Item, error) {
 	var ItemsId []int
 	var BuyItemsArray []domain.Item
 	var ItemsArray []domain.Item
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return nil, err
-	}
-	BuyItems, err := Veritabani.Db.Select("ItemUser")
+
+	BuyItems, err := Is.db.Select("ItemUser")
 	if err != nil {
 		return nil, err
 	}

@@ -1,24 +1,27 @@
 package service
 
 import (
-	"petshop/Database"
 	"petshop/domain"
 	"petshop/pkg"
+
+	jsondb "github.com/SefaBolukbasii/JsonDB"
 )
 
-type UserService struct{}
+type UserService struct {
+	db *jsondb.Database
+}
 
+func CreateUserService(db *jsondb.Database) domain.IUserService {
+	return &UserService{db: db}
+}
 func (us *UserService) Register(username, password, role string) error {
 	// Kullanıcı kayıt işlemi
-	Veritabani, err := Database.Connect()
+
+	password, err := pkg.HashPassword(password)
 	if err != nil {
 		return err
 	}
-	password, err = pkg.HashPassword(password)
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Insert("Users", map[string]any{
+	if err := us.db.Insert("Users", map[string]any{
 		"username": username,
 		"password": password,
 		"role":     role,
@@ -31,11 +34,8 @@ func (us *UserService) Register(username, password, role string) error {
 }
 
 func (us *UserService) Login(username, password string) (*domain.User, error) {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return nil, err
-	}
-	users, err := Veritabani.Db.Select("Users")
+
+	users, err := us.db.Select("Users")
 	if err != nil {
 		return nil, err
 	}
@@ -58,32 +58,23 @@ func (us *UserService) Login(username, password string) (*domain.User, error) {
 }
 
 func (us *UserService) ChangeBalance(user *domain.User, oldBalance, newBalance int) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Update("Users", "balance", oldBalance, newBalance); err != nil {
+
+	if err := us.db.Update("Users", "balance", oldBalance, newBalance); err != nil {
 		return err
 	}
 	user.Balance = newBalance
 	return nil
 }
 func (us *UserService) DeleteUser(UserId int) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Delete("Users", "id", UserId); err != nil {
+
+	if err := us.db.Delete("Users", "id", UserId); err != nil {
 		return err
 	}
 	return nil
 }
 func (us *UserService) ListUser() ([]domain.User, error) {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return nil, err
-	}
-	Users, err := Veritabani.Db.Select("Users")
+
+	Users, err := us.db.Select("Users")
 	if err != nil {
 		return nil, err
 	}

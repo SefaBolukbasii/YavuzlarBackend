@@ -1,17 +1,21 @@
 package service
 
 import (
-	"petshop/Database"
+	"petshop/domain"
+
+	jsondb "github.com/SefaBolukbasii/JsonDB"
 )
 
-type LogService struct{}
+type LogService struct {
+	db *jsondb.Database
+}
 
+func CreateLogService(db *jsondb.Database) domain.ILog {
+	return &LogService{db: db}
+}
 func (ls *LogService) LogAdd(UserId int, Transaction string) error {
-	Veritabani, err := Database.Connect()
-	if err != nil {
-		return err
-	}
-	if err := Veritabani.Db.Insert("Log", map[string]any{
+
+	if err := ls.db.Insert("Log", map[string]any{
 		"UserId":      UserId,
 		"Transaction": Transaction,
 	}); err != nil {
