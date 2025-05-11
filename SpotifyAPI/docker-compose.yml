@@ -1,0 +1,38 @@
+services:
+  db:
+    container_name: spotify-db
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_DB=spotify
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin1234
+    ports:
+      - 5432:5432
+    networks:
+      - apiprogram
+  api:
+    container_name: spotify-api
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    restart: always
+    networks:
+      - apiprogram
+  migrations:
+    image: ghcr.io/kukymbr/goose-docker:3.24.3
+    container_name: spotify-migrate
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=host=db port=5432 user=postgres password=admin1234 dbname=spotify sslmode=disable
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - db
+    command: goose -dir /migrations postgres "user=postgres password=admin1234 host=db port=5433 dbname=spotify sslmode=disable" up
+    networks:
+      - apiprogram
+networks:
+  apiprogram:
+    driver: bridge
