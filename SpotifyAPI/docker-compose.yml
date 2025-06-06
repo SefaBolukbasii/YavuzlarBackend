@@ -33,6 +33,17 @@ services:
     command: goose -dir /migrations postgres "user=postgres password=admin1234 host=db port=5433 dbname=spotify sslmode=disable" up
     networks:
       - apiprogram
+  redis:
+    image: redis:7
+    container_name: spotify-redis
+    ports:
+      - 6379:6379
+    networks:
+      - apiprogram
+    volumes:
+      - redis-data:/data
 networks:
   apiprogram:
     driver: bridge
+volumes:
+  redis-data:
